@@ -1,13 +1,12 @@
 // ==UserScript==
 // @name         Risibank Avatar
 // @namespace    http://tampermonkey.net/
-// @version      2024-09.v0.1.1
+// @version      2024-09.v0.1.3
 // @description  Offre la possibilite d'ajouter un avatar anime (GIF) dans les parametres de profil JVC (Fonctionne aussi avec des images fixes) aux yeux des utilisateurs de ce script.
 // @author       Treflou
 // @match        https://www.jeuxvideo.com/forums/*
 // @match        https://www.jeuxvideo.com/messages-prives/*
-// @match        https://www.jeuxvideo.com/profil/*?mode=infos
-// @match        https://www.jeuxvideo.com/profil/*?mode=historique_forum
+// @match        https://www.jeuxvideo.com/profil/*
 // @match        https://www.jeuxvideo.com/sso/infos_pseudo.php?id=*
 // @icon         https://risibank.fr/logo.png
 // @grant        none
@@ -208,19 +207,41 @@
     }
 
     if (window.location.href.includes("profil")) { //Si Page Profil
-        try {
-            let ProfilSignatureElement = document.getElementsByClassName("bloc-signature-desc"); //Regarde la signature
-            let ProfilSignature = ProfilSignatureElement[0].textContent; //Récupère le texte de la signature
-            let ProfilTag = getTag(ProfilSignature); //Récupère le tag en signature si existant
-            if (ProfilTag != "") {
-
-                let NewProfilAvatarURL = tagToURL(ProfilTag); //Permet de convertir le tag en lien Risibank équivalent
-                let ProfilAvatar = document.querySelector("#header-profil > div.content-img-avatar > img");
-                ProfilAvatar.setAttribute("src", NewProfilAvatarURL); //Change l'avatar de la page profil avec l'avatar animé
-                ProfilAvatar.setAttribute("data-src", ""); // Corrige le lazy load
+	    if (window.location.href.includes("?mode=infos")) { //Si Page Profil
+            try {
+                let ProfilSignatureElement = document.getElementsByClassName("bloc-signature-desc"); //Regarde la signature
+                let ProfilSignature = ProfilSignatureElement[0].textContent; //Récupère le texte de la signature
+                let ProfilTag = getTag(ProfilSignature); //Récupère le tag en signature si existant
+                if (ProfilTag != "") {
+                    let NewProfilAvatarURL = tagToURL(ProfilTag); //Permet de convertir le tag en lien Risibank équivalent
+                    let ProfilAvatar = document.querySelector("#header-profil > div.content-img-avatar > img");
+                    ProfilAvatar.setAttribute("src", NewProfilAvatarURL); //Change l'avatar de la page profil avec l'avatar animé
+                    ProfilAvatar.setAttribute("data-src", ""); // Corrige le lazy load
+                }
+            } catch (error) {
+                console.error("Pas de Valeur PP signature"); //Si pas de tag en signature -> Message d'erreur
             }
-        } catch (error) {
-            console.error("Pas de Valeur PP signature"); //Si pas de tag en signature -> Message d'erreur
+        } else {
+            (async () => {
+                try {
+                    const abonneUrl = window.location.href.replace(/(\?.*)?$/, '?mode=infos');
+                    const response = await fetch(abonneUrl); // Await the fetch request
+                    const html = await response.text(); // Await and get the response text
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    let ProfilSignatureElement = doc.getElementsByClassName("bloc-signature-desc");
+                    let ProfilSignature = ProfilSignatureElement[0].textContent; // Get signature text
+                    let ProfilTag = getTag(ProfilSignature); // Extract the tag from the signature
+                    if (ProfilTag !== "") {
+                        let NewProfilAvatarURL = tagToURL(ProfilTag); // Convert the tag to the Risibank URL
+                        let ProfilAvatar = document.querySelector("#header-profil > div.content-img-avatar > img");
+                        ProfilAvatar.setAttribute("src", NewProfilAvatarURL);
+                        ProfilAvatar.setAttribute("data-src", ""); // Fix lazy loading issue
+                    }
+                } catch (error) {
+                    console.error('Error during profile processing:', error);
+                }
+            })();
         }
     }
 
