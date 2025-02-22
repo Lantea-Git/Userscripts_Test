@@ -1215,6 +1215,9 @@ let storageKey = "jvchat-premium-configuration";
 let ringBell = undefined;
 let configuration = undefined;
 
+// Structure pour stocker les requêtes en attente
+let pendingRequests = [];
+
 function defaultConfig() {
     return {
         default_reduced: false,
@@ -1653,6 +1656,17 @@ function clearPage(document) {
             nbNewMessage = 0;
         } else if (!isError && !isLocked) {
             setFavicon("");
+        }
+
+        if (!document.hidden) {
+            console.log("L'onglet est redevenu actif, exécution des requêtes en attente...");
+
+            // Exécute toutes les requêtes en attente et vide la file d’attente
+            while (pendingRequests.length > 0) {
+                let req = pendingRequests.shift(); // Retire la première requête
+                console.log("Reprise de la requête :", req.url);
+                request(req.mode, req.url, req.callbackSuccess, req.callbackError, req.callbackTimeout, req.data, req.json, req.timeout, req.nocache);
+            }
         }
     });
 }
@@ -3073,6 +3087,16 @@ function bindJVChatButton(document) {
 }
 
 function request(mode, url, callbackSuccess, callbackError, callbackTimeout, data, json, timeout, nocache) {
+    // Si l'onglet est inactif
+    if (document.hidden) {
+         console.log("Onglet inactif, requête annulée :", url);
+
+          // On stocke la requête annulée dans la file d'attente
+          pendingRequests.push({ mode, url, callbackSuccess, callbackError, callbackTimeout, data, json, timeout, nocache });
+
+          return; // on quitte sans faire la requête
+    }
+
     json = !!json;
     let xhr = new XMLHttpRequest();
     xhr.timeout = timeout;
