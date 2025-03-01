@@ -1215,6 +1215,9 @@ let storageKey = "jvchat-premium-configuration";
 let ringBell = undefined;
 let configuration = undefined;
 
+// Structure pour stocker les requêtes en attente
+let pendingRequests = new Map(); // Clé = URL, Valeur = objet requête
+
 function defaultConfig() {
     return {
         default_reduced: false,
@@ -1653,6 +1656,28 @@ function clearPage(document) {
             nbNewMessage = 0;
         } else if (!isError && !isLocked) {
             setFavicon("");
+        }
+
+        if (!document.hidden) {
+            console.log("L'onglet est redevenu actif, exécution des requêtes en attente...");
+
+            let requestsArray = Array.from(pendingRequests.values()); // Récupérer toutes les requêtes en attente
+            pendingRequests.clear(); // On vide la file pour ne pas exécuter les mêmes requêtes plusieurs fois
+
+            function executeBatch(batchSize) {
+                let batch = requestsArray.splice(0, batchSize); // Prend les N premières requêtes
+                batch.forEach(req => {
+                    console.log("Reprise de la requête :", req.url);
+                    request(req.mode, req.url, req.callbackSuccess, req.callbackError, req.callbackTimeout, req.data, req.json, req.timeout, req.nocache);
+                });
+
+                if (requestsArray.length > 0) {
+                    // Si d'autres requêtes sont en attente, on attend un peu avant de les exécuter
+                    setTimeout(() => executeBatch(batchSize), 500); // Exécuter les suivantes après 500ms
+                }
+            }
+
+            executeBatch(2); // Lance 2 requêtes, puis attend pour exécuter les suivantes
         }
     });
 }
@@ -3073,6 +3098,16 @@ function bindJVChatButton(document) {
 }
 
 function request(mode, url, callbackSuccess, callbackError, callbackTimeout, data, json, timeout, nocache) {
+    // Si l'onglet est inactif
+    if (document.hidden) {
+        console.log("Onglet inactif, requête annulée :", url);
+
+        // On stocke la requête dans la file d'attente
+        pendingRequests.set(url, { mode, url, callbackSuccess, callbackError, callbackTimeout, data, json, timeout, nocache });
+
+        return; // Ne pas exécuter la requête immédiatement
+    }
+
     json = !!json;
     let xhr = new XMLHttpRequest();
     xhr.timeout = timeout;
