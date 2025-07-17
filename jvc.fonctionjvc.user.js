@@ -23,7 +23,7 @@
 // @connect      risibank.fr
 // @connect      image.noelshack.com
 // @grant        GM_addStyle
-// @grant        GM_getValue
+// @grant        GM_getValued
 // @grant        GM_setValue
 // @grant        GM_xmlhttpRequest
 // @grant        GM.addStyle
