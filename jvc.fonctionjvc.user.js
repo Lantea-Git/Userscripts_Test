@@ -15,7 +15,7 @@
 // @match        https://m.jeuxvideo.com/forums/create_topic.php*
 // @match        https://m.jeuxvideo.com/forums/create_message.php*
 // @match        https://m.jeuxvideo.com/forums/*
-// @icon         https://risibank.fr/logo.png
+// @icon         https://risibank.fr/logo.pnga
 // @require      https://risibank.fr/downloads/web-api/risibank.js?1.3.0
 // @updateURL    https://risibank.fr/downloads/userscript/jvc/jvc.user.js
 // @downloadURL  https://risibank.fr/downloads/userscript/jvc/jvc.user.js
