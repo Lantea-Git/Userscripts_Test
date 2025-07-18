@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Noelshack_Mosaique
 // @namespace    Noelshack_Mosaique
-// @version      2.8
+// @version      2.9
 // @description  Découpe une image et envoie chaque bloc sur Noelshack.
 // @author       Atlantis
 // @icon         https://image.jeuxvideo.com/smileys_img/26.gif
@@ -183,7 +183,7 @@
                 }
 
                 output.textContent = allUrls.join('\n');
-                title.textContent = '📋 Résultat Noëlshack :';
+                title.textContent = '📋 Résultat Noelshack :';
                 copyBtn.style.display = 'inline-block';
             };
             img.src = e.target.result;
