@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Noelshack_Mosaique
 // @namespace    Noelshack_Mosaique
-// @version      2.7
+// @version      2.8
 // @description  Découpe une image et envoie chaque bloc sur Noelshack.
 // @author       Atlantis
 // @icon         https://image.jeuxvideo.com/smileys_img/26.gif
@@ -208,7 +208,6 @@
                     url: `https://www.noelshack.com/envoi.json`,
                     data: body,
                     headers: {
-                        'Connection': 'close',
                         'Content-Type': `multipart/form-data; boundary=${boundary}`
                     },
                     //binary: true, //pas compatible avec violentmonkey
