@@ -1,9 +1,10 @@
 // ==UserScript==
 // @name         Noelshack_Mosaique
 // @namespace    Noelshack_Mosaique
-// @version      2.3
+// @version      2.4
 // @description  Découpe une image et envoie chaque bloc sur Noelshack.
 // @author       Atlantis
+// @icon         https://image.jeuxvideo.com/smileys_img/26.gif
 // @license      CC0-1.0
 // match        *://www.jeuxvideo.com/forums/*
 // @match        *://nocturnex.alwaysdata.net/mosajax/
