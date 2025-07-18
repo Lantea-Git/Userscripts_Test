@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Noelshack_Mosaique
 // @namespace    Noelshack_Mosaique
-// @version      2.5
+// @version      2.7
 // @description  Découpe une image et envoie chaque bloc sur Noelshack.
 // @author       Atlantis
 // @icon         https://image.jeuxvideo.com/smileys_img/26.gif
@@ -15,8 +15,10 @@
 // ==/UserScript==
 
 (function () {
-    const BLOCK_WIDTH = 272;
-    const BLOCK_HEIGHT = 204;
+    const LOGICAL_BLOCK_WIDTH = 136;
+    const LOGICAL_BLOCK_HEIGHT = 102;
+    const BLOCK_WIDTH = LOGICAL_BLOCK_WIDTH * 2;
+    const BLOCK_HEIGHT = LOGICAL_BLOCK_HEIGHT * 2;
 
     // UI flottante
     const ui = document.createElement('div');
@@ -123,8 +125,17 @@
         reader.onload = function (e) {
             const img = new Image();
             img.onload = async function () {
-                const cols = parseInt(prompt("Colonnes - Largeur (max 8)", "3")) || 1;
-                const rows = parseInt(prompt("Lignes - Hauteur (max 10)", "3")) || 1;
+                // Calcul intelligent des colonnes/lignes
+                const autoCols = Math.min(8, Math.max(1, Math.ceil(img.width / LOGICAL_BLOCK_WIDTH)));
+                const autoRows = Math.min(10, Math.max(1, Math.ceil(img.height / LOGICAL_BLOCK_HEIGHT)));
+
+                const cols = Math.min(8, Math.max(1,
+                    parseInt(prompt(`Largeur (max 8), (recommandée ${autoCols})`, autoCols)) || 1
+                ));
+                const rows = Math.min(10, Math.max(1,
+                    parseInt(prompt(`Hauteur (max 10), (recommandée ${autoRows})`, autoRows)) || 1
+                ));
+
 
                 const totalW = BLOCK_WIDTH * cols;
                 const totalH = BLOCK_HEIGHT * rows;
@@ -180,7 +191,7 @@
         reader.readAsDataURL(file);
     };
 
-    function retryUpload(blob, filename, maxRetries = 12, delay = 3000) {
+    function retryUpload(blob, filename, maxRetries = 10, delay = 3000) {
         return new Promise((resolve) => {
             let attempt = 1;
 
@@ -194,9 +205,10 @@
 
                 GM_xmlhttpRequest({
                     method: 'POST',
-                    url: 'https://www.noelshack.com/envoi.json',
+                    url: `https://www.noelshack.com/envoi.json`,
                     data: body,
                     headers: {
+                        'Connection': 'close',
                         'Content-Type': `multipart/form-data; boundary=${boundary}`
                     },
                     //binary: true, //pas compatible avec violentmonkey
@@ -231,6 +243,11 @@
                         } else {
                             console.warn(`❌ ${filename} → Erreur réseau`);
                             resolve(`[ECHEC]-${filename}`);
+                            output.innerHTML = `❌ ${filename} → Transfert impossible<br> <u><b>Fermer => réouvrir le navigateur pour corriger le soucis.</b></u>`;
+                            btn.textContent = '❌ Redémarrer le navigateur';
+                            btn.onclick = () => {
+                                alert("Veuillez fermer complètement votre navigateur (pas juste l'onglet) puis le rouvrir pour corriger le problème.");
+                            };
                         }
                     }
                 });
