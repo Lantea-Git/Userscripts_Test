@@ -1,11 +1,14 @@
 // ==UserScript==
 // @name         Noelshack_Mosaique
 // @namespace    Noelshack_Mosaique
-// @version      2.2
+// @version      2.3
 // @description  Découpe une image et envoie chaque bloc sur Noelshack.
 // @author       Atlantis
 // @license      CC0-1.0
-// @match        *://www.jeuxvideo.com/*
+// match        *://www.jeuxvideo.com/forums/*
+// @match        *://nocturnex.alwaysdata.net/mosajax/
+// @downloadURL  https://github.com/Lantea-Git/Userscripts_Test/raw/main/Noelshack_Mosaique.user.js
+// @updateURL    https://github.com/Lantea-Git/Userscripts_Test/raw/main/Noelshack_Mosaique.user.js
 // @grant        GM_xmlhttpRequest
 // @connect      www.noelshack.com
 // ==/UserScript==
@@ -17,6 +20,7 @@
     // UI flottante
     const ui = document.createElement('div');
     Object.assign(ui.style, {
+        color: '#212121',
         position: 'fixed',
         bottom: '30px',
         left: '30px',
@@ -34,6 +38,7 @@
         maxHeight: '50vh',
         display: 'none'
     });
+
 
     const title = document.createElement('div');
     title.textContent = '📤 Envoi en cours...';
@@ -87,20 +92,14 @@
 
     // Bouton principal
     const btn = document.createElement('button');
-    btn.textContent = '📤 Upload Mosaïc';
+    btn.textContent = '📤 Fix Upload Mosaïc';
+    btn.classList.add('btn', 'btn-primary');
     Object.assign(btn.style, {
+        color: 'white',
         position: 'fixed',
         bottom: '30px',
         right: '30px',
-        padding: '10px 16px',
-        background: '#2196f3',
-        color: 'white',
-        border: 'none',
-        borderRadius: '6px',
-        fontWeight: 'bold',
-        fontSize: '14px',
         zIndex: 9999,
-        cursor: 'pointer'
     });
     document.body.appendChild(btn);
 
@@ -111,7 +110,7 @@
     document.body.appendChild(input);
 
     btn.onclick = () => input.click();
-
+    const sessionId = Math.random().toString(36).slice(2, 10);
     input.onchange = () => {
         const file = input.files[0];
         if (!file) return;
@@ -123,8 +122,8 @@
         reader.onload = function (e) {
             const img = new Image();
             img.onload = async function () {
-                const cols = parseInt(prompt("🧮 Colonnes (max 8)", "3")) || 1;
-                const rows = parseInt(prompt("🧮 Lignes (max 10)", "3")) || 1;
+                const cols = parseInt(prompt("Colonnes - Largeur (max 8)", "3")) || 1;
+                const rows = parseInt(prompt("Lignes - Hauteur (max 10)", "3")) || 1;
 
                 const totalW = BLOCK_WIDTH * cols;
                 const totalH = BLOCK_HEIGHT * rows;
@@ -142,6 +141,7 @@
                 output.textContent = '';
                 copyBtn.style.display = 'none';
 
+                const mosaicId = Math.random().toString(36).slice(2, 8);
                 for (let y = 0; y < rows; y++) {
                     const rowUrls = [];
                     for (let x = 0; x < cols; x++) {
@@ -159,12 +159,12 @@
 
                         const blob = await new Promise(res => blockCanvas.toBlob(res, 'image/png'));
                         const index = y * cols + x + 1;
-                        const filename = `${String(index).padStart(2, '0')}-mosaic.png`;
+                        const filename = `${String(index).padStart(2, '0')}-${mosaicId}.png`;
 
                         const url = await retryUpload(blob, filename);
                         rowUrls.push(url);
 
-                        title.textContent = `📤 Envoi bloc [${y + 1}, ${x + 1}]`;
+                        title.textContent = `⟳ Envoi bloc vers NoelShach : [Ligne : ${y + 1}, Colone : ${x + 1}]`;
                     }
 
                     allUrls.push(rowUrls.join(' '));
@@ -185,7 +185,8 @@
 
             const tryUpload = () => {
                 console.log(`📡Tentative #${attempt} pour "${filename}"`);
-                const boundary = '----WebKitFormBoundary' + Math.random().toString(16).slice(2);
+                //const boundary = '----WebKitFormBoundary' + Math.random().toString(16).slice(2);
+                const boundary = `----WebKitFormBoundary_${sessionId}_${Math.random().toString(16).slice(2)}`;
                 const head = `--${boundary}\r\nContent-Disposition: form-data; name="fichier[]"; filename="${filename}"\r\nContent-Type: ${blob.type}\r\n\r\n`;
                 const tail = `\r\n--${boundary}--\r\n`;
                 const body = new Blob([head, blob, tail]);
@@ -204,12 +205,12 @@
                             const data = JSON.parse(res.responseText);
                             if (res.status === 200 && data?.url) {
                                 resolve(data.url);
-                            } else if (res.status === 429 && attempt < maxRetries) {
+                            } else if (res.status !== 200 && attempt < maxRetries) {
                                 attempt++;
                                 setTimeout(tryUpload, delay);
                             } else {
                                 console.warn(`❌ ${filename} → HTTP ${res.status}`);
-                                resolve("[ÉCHEC]");
+                                resolve(`[ECHEC]-${filename}`);
                             }
                         } catch (e) {
                             if (attempt < maxRetries) {
@@ -217,7 +218,7 @@
                                 setTimeout(tryUpload, delay);
                             } else {
                                 console.warn(`❌ ${filename} → Erreur JSON`);
-                                resolve("[ÉCHEC]");
+                                resolve(`[ECHEC]-${filename}`);
                             }
                         }
                     },
@@ -227,7 +228,7 @@
                             setTimeout(tryUpload, delay);
                         } else {
                             console.warn(`❌ ${filename} → Erreur réseau`);
-                            resolve("[ÉCHEC]");
+                            resolve(`[ECHEC]-${filename}`);
                         }
                     }
                 });
