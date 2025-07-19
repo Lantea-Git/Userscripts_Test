@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Noelshack_Mosaique
 // @namespace    Noelshack_Mosaique
-// @version      3.2
+// @version      3.3
 // @description  Découpe une image et envoie chaque bloc sur Noelshack.
 // @author       Atlantis
 // @icon         https://image.jeuxvideo.com/smileys_img/26.gif
@@ -176,7 +176,9 @@
                         const url = await retryUpload(blob, filename);
                         rowUrls.push(url);
 
-                        title.textContent = `⟳ Envoi bloc vers NoelShach : [Ligne : ${y + 1}, Colone : ${x + 1}]`;
+                        const total = cols * rows; // total images
+                        title.textContent = `⟳ Envoi bloc vers NoelShach : [Ligne : ${y + 1}, Colone : ${x + 1}] \n Traitées : [${index}/${total}] (Certains seuils sont long)`;
+
                     }
 
                     allUrls.push(rowUrls.join(' '));
@@ -247,7 +249,6 @@
                     }
                 });
             };
-
             tryUpload();
         });
     }
