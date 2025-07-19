@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Noelshack_Mosaique
 // @namespace    Noelshack_Mosaique
-// @version      3.6
+// @version      4.1
 // @description  Découpe une image et envoie chaque bloc sur Noelshack.
 // @author       Atlantis
 // @icon         https://image.jeuxvideo.com/smileys_img/26.gif
@@ -44,7 +44,7 @@
 
 
     const title = document.createElement('div');
-    title.textContent = '📤 Envoi en cours...';
+    title.textContent = '⏫ Envoi en cours...';
     title.style.fontWeight = 'bold';
     title.style.marginBottom = '6px';
 
@@ -95,7 +95,7 @@
 
     // Bouton principal
     const btn = document.createElement('button');
-    btn.textContent = '📤 Fix Upload Mosaïc';
+    btn.textContent = '⏫ Fix Upload Mosaïc';
     btn.classList.add('btn', 'btn-primary');
     Object.assign(btn.style, {
         color: 'white',
@@ -149,7 +149,7 @@
                 const allUrls = [];
 
                 ui.style.display = 'block';
-                title.textContent = '📤 Envoi en cours...';
+                title.textContent = '⏫ Envoi en cours...';
                 output.textContent = '';
                 copyBtn.style.display = 'none';
 
@@ -170,11 +170,15 @@
                         );
 
                         // Injection de bruit minimal (éviter images trop uniformes ou transparentes)
-                        const imgData = bctx.getImageData(1, 1, 1, 1); // pixel en (1,1)
+                        const randX = Math.floor(Math.random() * BLOCK_WIDTH);
+                        const randY = Math.floor(Math.random() * BLOCK_HEIGHT);
+                        const imgData = bctx.getImageData(randX, randY, 1, 1);
                         const d = imgData.data;
-                        d[0] += (d[0] <= 253) ? 2 : -2; // Rouge : +/-2 selon la valeur actuelle
-                        d[3] += (d[3] <= 253) ? 2 : -2; // Alpha : +/-2 selon la valeur actuelle
-                        bctx.putImageData(imgData, 1, 1);
+                        d[0] += (d[0] <= 253) ? 2 : -2; // Rouge
+                        d[3] += (d[3] <= 253) ? 2 : -2; // Alpha
+                        bctx.putImageData(imgData, randX, randY);
+                        console.log(`Pixel bruit : x : ${randX + 1}, y : ${randY + 1}`);
+
 
                         const blob = await new Promise(res => blockCanvas.toBlob(res, 'image/png'));
                         const index = y * cols + x + 1;
@@ -184,7 +188,7 @@
                         rowUrls.push(url);
 
                         const total = cols * rows; // total images
-                        title.textContent = `⟳ Envoi bloc vers NoelShach : [Ligne : ${y + 1}, Colone : ${x + 1}] \n Traitées : [${index}/${total}] (Certains seuils sont long)`;
+                        title.textContent = `⟳ Envoi bloc vers Noelshack : [Ligne : ${y + 1}, Colone : ${x + 1}] \n Traitées : [${index}/${total}] (Certains seuils sont long)`;
                     }
 
                     allUrls.push(rowUrls.join(' '));
@@ -204,7 +208,7 @@
             let attempt = 1;
 
             const tryUpload = () => {
-                console.log(`📡Tentative #${attempt} pour "${filename}"`);
+                console.log(`⏫ Tentative #${attempt} pour "${filename}"`);
                 const boundary = '----WebKitFormBoundary' + Math.random().toString(16).slice(2);
                 const part1 = `--${boundary}\r\nContent-Disposition: form-data; name="domain"\r\n\r\nhttps://www.jeuxvideo.com\r\n`;
                 const part2 = `--${boundary}\r\nContent-Disposition: form-data; name="fichier[]"; filename="${filename}"\r\nContent-Type: ${blob.type}\r\n\r\n`;
