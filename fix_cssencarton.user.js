@@ -12,8 +12,8 @@
 
 GM_addStyle(`
     .prev .grille div {
-        width: 66px;
-        height: 49px;
+        width: 68px;
+        height: 51px;
         display: inline-block;
         box-sizing: border-box;
         margin: 0;
