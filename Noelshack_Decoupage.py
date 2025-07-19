@@ -89,12 +89,15 @@ for row in range(rows):
         # bruit pixel IMPORTANT
         if block.shape[2] == 3:
             block = cv2.cvtColor(block, cv2.COLOR_BGR2BGRA)
-        b, g, r, a = block[1, 1]
+        rand_x = random.randint(0, block.shape[1] - 1)  # colonne
+        rand_y = random.randint(0, block.shape[0] - 1)  # ligne
+        b, g, r, a = block[rand_y, rand_x]
         r = r + 2 if r <= 253 else r - 2
         a = a + 2 if a <= 253 else a - 2
-        block[1, 1] = [b, g, r, a]
+        block[rand_y, rand_x] = [b, g, r, a]
+        print(f"Pixel bruit : x : {rand_x + 1}, y : {rand_y + 1}")
 
-        
+
         filename = f"{index:02d}-{group_id}.png"
         filepath = os.path.join(row_dir, filename)
         cv2.imwrite(filepath, block)
@@ -103,4 +106,4 @@ for row in range(rows):
 
 
 print("✅ blocs créés avec noms compatibles regex1.")
-time.sleep(2)
+input()
