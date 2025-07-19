@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Noelshack_Mosaique
 // @namespace    Noelshack_Mosaique
-// @version      3.0
+// @version      3.1
 // @description  Découpe une image et envoie chaque bloc sur Noelshack.
 // @author       Atlantis
 // @icon         https://image.jeuxvideo.com/smileys_img/26.gif
@@ -197,8 +197,7 @@
 
             const tryUpload = () => {
                 console.log(`📡Tentative #${attempt} pour "${filename}"`);
-                //const boundary = '----WebKitFormBoundary' + Math.random().toString(16).slice(2);
-                const boundary = `----WebKitFormBoundary_${sessionId}_${Math.random().toString(16).slice(2)}`;
+                const boundary = '----WebKitFormBoundary' + Math.random().toString(16).slice(2);
                 const part1 = `--${boundary}\r\nContent-Disposition: form-data; name="domain"\r\n\r\nhttps://www.jeuxvideo.com\r\n`;
                 const part2 = `--${boundary}\r\nContent-Disposition: form-data; name="fichier[]"; filename="${filename}"\r\nContent-Type: ${blob.type}\r\n\r\n`;
                 const tail = `\r\n--${boundary}--\r\n`;
