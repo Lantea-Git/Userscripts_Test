@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Noelshack_Mosaique
 // @namespace    Noelshack_Mosaique
-// @version      3.3
+// @version      3.4
 // @description  Découpe une image et envoie chaque bloc sur Noelshack.
 // @author       Atlantis
 // @icon         https://image.jeuxvideo.com/smileys_img/26.gif
@@ -169,6 +169,14 @@
                             0, 0, BLOCK_WIDTH, BLOCK_HEIGHT
                         );
 
+                        // Ajoute un léger bruit sur le pixel central (sinon noir)
+                        const imgData = bctx.getImageData(1, 1, 1, 1); // pixel en (1,1)
+                        const d = imgData.data;
+                        d[0] = (d[0] + 1) % 256; // R (rouge) +1
+                        d[3] = Math.max(1, (d[3] + 1) % 256); // A (alpha) +1, mais toujours > 0
+                        bctx.putImageData(imgData, 1, 1);
+
+
                         const blob = await new Promise(res => blockCanvas.toBlob(res, 'image/png'));
                         const index = y * cols + x + 1;
                         const filename = `${String(index).padStart(2, '0')}-${mosaicId}.png`;
@@ -178,7 +186,6 @@
 
                         const total = cols * rows; // total images
                         title.textContent = `⟳ Envoi bloc vers NoelShach : [Ligne : ${y + 1}, Colone : ${x + 1}] \n Traitées : [${index}/${total}] (Certains seuils sont long)`;
-
                     }
 
                     allUrls.push(rowUrls.join(' '));
