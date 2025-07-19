@@ -6,6 +6,8 @@
 // @author       Atlantis
 // @match        *://www.jeuxvideo.com/*
 // @grant        GM_addStyle
+// @downloadURL  https://github.com/Lantea-Git/Userscripts_Test/raw/main/debouclfix.user.js
+// @updateURL    https://github.com/Lantea-Git/Userscripts_Test/raw/main/debouclfix.user.js
 // ==/UserScript==
 
 
