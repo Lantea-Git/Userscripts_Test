@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Noelshack_Mosaique
 // @namespace    Noelshack_Mosaique
-// @version      3.1
+// @version      3.2
 // @description  Découpe une image et envoie chaque bloc sur Noelshack.
 // @author       Atlantis
 // @icon         https://image.jeuxvideo.com/smileys_img/26.gif
@@ -242,11 +242,7 @@
                         } else {
                             console.warn(`❌ ${filename} → Erreur réseau`);
                             resolve(`[ECHEC]-${filename}`);
-                            output.innerHTML = `❌ ${filename} → Transfert impossible<br> <u><b>Fermer => réouvrir le navigateur pour corriger le soucis.</b></u>`;
-                            btn.textContent = '❌ Redémarrer le navigateur';
-                            btn.onclick = () => {
-                                alert("Veuillez fermer complètement votre navigateur (pas juste l'onglet) puis le rouvrir pour corriger le problème.");
-                            };
+                            output.textContent = `❌ ${filename} → Transfert impossible.`;
                         }
                     }
                 });
