@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         csspatchnotune
 // @namespace    csspatchnotune
-// @version      0.0.2
+// @version      0.0.3
 // @description  Restore le bouton checkbox.
 // @match        *://nocturnex.alwaysdata.net/mosajax/
 // @grant        GM_addStyle
