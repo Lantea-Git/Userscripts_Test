@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Deboucledcheckboxtempfix
 // @namespace    Deboucledcheckboxtempfix
-// @version      0.0.1
+// @version      0.0.2
 // @description  Restore le bouton checkbox.
 // @author       Atlantis
 // @match        *://www.jeuxvideo.com/*
