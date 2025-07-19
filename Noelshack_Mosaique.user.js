@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Noelshack_Mosaique
 // @namespace    Noelshack_Mosaique
-// @version      2.9
+// @version      3.0
 // @description  Découpe une image et envoie chaque bloc sur Noelshack.
 // @author       Atlantis
 // @icon         https://image.jeuxvideo.com/smileys_img/26.gif
@@ -199,13 +199,14 @@
                 console.log(`📡Tentative #${attempt} pour "${filename}"`);
                 //const boundary = '----WebKitFormBoundary' + Math.random().toString(16).slice(2);
                 const boundary = `----WebKitFormBoundary_${sessionId}_${Math.random().toString(16).slice(2)}`;
-                const head = `--${boundary}\r\nContent-Disposition: form-data; name="fichier[]"; filename="${filename}"\r\nContent-Type: ${blob.type}\r\n\r\n`;
+                const part1 = `--${boundary}\r\nContent-Disposition: form-data; name="domain"\r\n\r\nhttps://www.jeuxvideo.com\r\n`;
+                const part2 = `--${boundary}\r\nContent-Disposition: form-data; name="fichier[]"; filename="${filename}"\r\nContent-Type: ${blob.type}\r\n\r\n`;
                 const tail = `\r\n--${boundary}--\r\n`;
-                const body = new Blob([head, blob, tail]);
+                const body = new Blob([part1, part2, blob, tail]);
 
                 GM_xmlhttpRequest({
                     method: 'POST',
-                    url: `https://www.noelshack.com/envoi.json`,
+                    url: `https://www.noelshack.com/webservice/envoi.json`,
                     data: body,
                     headers: {
                         'Content-Type': `multipart/form-data; boundary=${boundary}`
