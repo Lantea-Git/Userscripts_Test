@@ -95,7 +95,7 @@ for row in range(rows):
         r = r + 2 if r <= 253 else r - 2
         a = a + 2 if a <= 253 else a - 2
         block[rand_y, rand_x] = [b, g, r, a]
-        print(f"Pixel bruit : x : {rand_x + 1}, y : {rand_y + 1}")
+        print(f"Pixel bruité {index:02d} : x : {rand_x}, y : {rand_y}\nExemple Coin haut gauche = 0 / 0")
 
 
         filename = f"{index:02d}-{group_id}.png"
