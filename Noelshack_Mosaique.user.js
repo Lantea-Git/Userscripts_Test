@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Noelshack_Mosaique
 // @namespace    Noelshack_Mosaique
-// @version      4.5
+// @version      4.7
 // @description  Fix => aller sur le site https://nocturnex.alwaysdata.net/mosajax/  => et "Fix Upload Mosaïc".
 // @author       Atlantis
 // @icon         https://image.jeuxvideo.com/smileys_img/26.gif
@@ -25,8 +25,8 @@
     Object.assign(ui.style, {
         color: '#212121',
         position: 'fixed',
-        bottom: '30px',
-        left: '30px',
+        top: '100px',
+        right: '30px',
         width: '420px',
         background: '#fff',
         border: '1px solid #ccc',
@@ -74,7 +74,7 @@
         cursor: 'pointer',
         marginLeft: '8px'
     });
-    
+
     closeBtn.onclick = () => {
         ui.style.display = 'none';
     };
@@ -100,15 +100,15 @@
     Object.assign(btn.style, {
         color: 'white',
         position: 'fixed',
-        bottom: '30px',
-        right: '30px',
+        top: '100px',
+        left: '30px',
         zIndex: 9999,
     });
     document.body.appendChild(btn);
 
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = 'image/*';
+
     input.style.display = 'none';
     document.body.appendChild(input);
 
