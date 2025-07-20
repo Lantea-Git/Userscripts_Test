@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Noelshack_Mosaique
 // @namespace    Noelshack_Mosaique
-// @version      4.4
+// @version      4.5
 // @description  Fix => aller sur le site https://nocturnex.alwaysdata.net/mosajax/  => et "Fix Upload Mosaïc".
 // @author       Atlantis
 // @icon         https://image.jeuxvideo.com/smileys_img/26.gif
@@ -177,7 +177,7 @@
                         d[0] += (d[0] <= 253) ? 2 : -2; // Rouge
                         d[3] += (d[3] <= 253) ? 2 : -2; // Alpha
                         bctx.putImageData(imgData, randX, randY);
-                        console.log(`Pixel bruit : x : ${randX + 1}, y : ${randY + 1}`);
+                        console.log(`Pixel bruité : x : ${randX}, y : ${randY}\nExemple Coin haut gauche = 0 / 0`);
 
 
                         const blob = await new Promise(res => blockCanvas.toBlob(res, 'image/png'));
