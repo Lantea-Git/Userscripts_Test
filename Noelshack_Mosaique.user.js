@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Noelshack_Mosaique
 // @namespace    Noelshack_Mosaique
-// @version      4.1
-// @description  Découpe une image et envoie chaque bloc sur Noelshack.
+// @version      4.2
+// @description  Fix pour https://nocturnex.alwaysdata.net/mosajax/ aller sur le site et => "Fix Upload Mosaïc".
 // @author       Atlantis
 // @icon         https://image.jeuxvideo.com/smileys_img/26.gif
 // @license      CC0-1.0
