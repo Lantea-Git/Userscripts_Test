@@ -1928,7 +1928,7 @@ function triggerJVChat() {
     if (formBlock) {
         // Création du conteneur et du bouton avec l'icône initiale
         const toggleButtonHtml = `
-            <div style="text-align: right; padding-bottom: 5px;">
+            <div class="bloc-toggle" style="text-align: right; padding-bottom: 5px;">
                 <button id="jvchat-toggle-form-btn" class="btn btn-secondary btn-x-small" title="Masquer/Afficher le formulaire">
                     ⇩
                 </button>
