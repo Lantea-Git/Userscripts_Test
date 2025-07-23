@@ -5,23 +5,31 @@ import time
 #DEMANDE LA LIBRARIE opencv-python
 #DEMANDE LA LIBRARIE requests
 
+#Les points les plus important sont ecrit avec [X].
+
+
+#[1] SYSTÈME D'UPLOAD AVEC GESTION DES ERREURS 429 => 10 TENTATIVES
+#[1] On évite IMPÉRATIVEMENT LES REQUÊTES PARALLÈLES risque de blocage + Ralentissement important au final .
 def upload_image(filepath, max_retries=10, retry_delay=3):
     filename = os.path.basename(filepath)
     mime = 'image/png' if filename.lower().endswith('.png') else 'image/jpeg'
 
     for attempt in range(1, max_retries + 1):
         try:
+            #[2] Envoie vers le domaine. "/webservice/" EST TRÈS IMPORTANT => Car il y a une entrée erronée 
+            #[2] Toujours ajouter l'entête 'domain : https://www.jeuxvideo.com' Elle est indispensable mais ce n'est pas une autorisation.
             with open(filepath, 'rb') as f:
                 files = [
                     ('fichier[]', (filename, f, mime)),
                     ('domain', (None, 'https://www.jeuxvideo.com'))  # ✅ C’est ce champ qui autorise l’upload
                 ]
-                response = requests.post('https://www.noelshack.com/envoi.json', files=files)
+                response = requests.post('https://www.noelshack.com/webservice/envoi.json', files=files)
 
 
             if response.status_code == 200:
                 try:
                     data = response.json()
+                    # [3] ON RECUPERE SEULEMENT URL (image direct) DE LA REPONSE
                     url = data["url"]
                     print(f"✅ {filename} envoyé")
                     return url
@@ -68,11 +76,11 @@ def main():
             print(url, end=' ')  # Affichage immédiat
             row_urls.append(url)
 
-        print()  # retour à la ligne après chaque row
-        result_lines.append(' '.join(row_urls))  # stocke la ligne
+        print()  # PRINT FORCE LE RETOUR à la ligne à chaque LIGNE
+        result_lines.append(' '.join(row_urls))  # on ecrit la nouvelle ligne
 
     # 🎯 Affichage final bien propre à copier
-    print("\n🟩 URLs FINALES :\n")
+    print("\n🟩 URLs FINALES (juste copier coller) :\n")
     print('\n'.join(result_lines))
     input()
 
