@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Noelshack_Mosaique
 // @namespace    Noelshack_Mosaique
-// @version      4.7
+// @version      4.9
 // @description  Fix => aller sur le site https://nocturnex.alwaysdata.net/mosajax/  => et "Fix Upload Mosaïc".
 // @author       Atlantis
 // @icon         https://image.jeuxvideo.com/smileys_img/26.gif
@@ -188,7 +188,7 @@
                         rowUrls.push(url);
 
                         const total = cols * rows; // total images
-                        title.textContent = `⟳ Envoi bloc vers Noelshack : [Ligne : ${y + 1}, Colone : ${x + 1}] \n Traitées : [${index}/${total}] (Certains seuils sont long)`;
+                        title.textContent = `⟳ Envoi bloc vers Noelshack : [Ligne : ${y + 1}, Colone : ${x + 1}] \n Traitées : [${index}/${total}] (Seuils de 4 sont LONG)`;
                     }
 
                     allUrls.push(rowUrls.join(' '));
@@ -209,22 +209,14 @@
 
             const tryUpload = () => {
                 console.log(`⏫ Tentative #${attempt} pour "${filename}"`);
-                const boundary = '----WebKitFormBoundary' + Math.random().toString(16).slice(2);
-                const part1 = `--${boundary}\r\nContent-Disposition: form-data; name="domain"\r\n\r\nhttps://www.jeuxvideo.com\r\n`;
-                const part2 = `--${boundary}\r\nContent-Disposition: form-data; name="fichier[]"; filename="${filename}"\r\nContent-Type: ${blob.type}\r\n\r\n`;
-                const tail = `\r\n--${boundary}--\r\n`;
-                const body = new Blob([part1, part2, blob, tail]);
+                const formData = new FormData();
+                formData.append('domain', 'https://www.jeuxvideo.com');
+                formData.append('fichier[]', blob, filename);
 
                 GM_xmlhttpRequest({
                     method: 'POST',
-                    url: `https://www.noelshack.com/webservice/envoi.json`,
-                    data: body,
-                    headers: {
-                        'Content-Type': `multipart/form-data; boundary=${boundary}`
-                    },
-                    //binary: true, //pas compatible avec violentmonkey
-                    overrideMimeType: 'application/octet-stream',
-                    responseType: 'text',
+                    url: 'https://www.noelshack.com/webservice/envoi.json',
+                    data: formData,
                     onload: function (res) {
                         try {
                             const data = JSON.parse(res.responseText);
