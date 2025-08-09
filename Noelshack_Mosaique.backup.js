@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Noelshack_Mosaique
 // @namespace    Noelshack_Mosaique
-// @version      4.9.1
+// @version      5.6
 // @description  Fix => aller sur le site https://nocturnex.alwaysdata.net/mosajax/  => et "Fix Upload Mosaïc".
 // @author       Atlantis
 // @icon         https://image.jeuxvideo.com/smileys_img/26.gif
@@ -206,20 +206,33 @@
     function retryUpload(blob, filename, maxRetries = 10, delay = 3000) {
         return new Promise((resolve) => {
             let attempt = 1;
-
+    
             const tryUpload = () => {
                 console.log(`⏫ Tentative #${attempt} pour "${filename}"`);
                 const formData = new FormData();
                 formData.append('domain', 'https://www.jeuxvideo.com');
                 formData.append('fichier[]', blob, filename);
 
-                GM_xmlhttpRequest({
-                    method: 'POST',
-                    url: 'https://www.noelshack.com/webservice/envoi.json',
-                    data: formData,
-                    onload: handleResponse,
-                    onerror: handleError
-                });
+                //CORS OK
+                if (location.href.includes("www.jeuxvideo.com")) {
+                    // ====== MODE FETCH ======
+                    fetch('https://www.noelshack.com/webservice/envoi.json', {
+                        method: 'POST',
+                        body: formData
+                    }).then(async (res) => {
+                        const text = await res.text();
+                        handleResponse({ status: res.status, responseText: text });
+                    }).catch(() => handleError());
+                } else {
+                    // ====== MODE GM ======
+                    GM_xmlhttpRequest({
+                        method: 'POST',
+                        url: 'https://www.noelshack.com/webservice/envoi.json',
+                        data: formData,
+                        onload: handleResponse,
+                        onerror: handleError
+                    });
+                }
             };
 
             const handleResponse = function (res) {
@@ -254,7 +267,9 @@
                     output.textContent = `❌ ${filename} → Transfert impossible.`;
                 }
             };
+
             tryUpload();
         });
     }
+
 })();
