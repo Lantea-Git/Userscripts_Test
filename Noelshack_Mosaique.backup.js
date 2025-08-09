@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Noelshack_Mosaique
 // @namespace    Noelshack_Mosaique
-// @version      4.9
+// @version      4.9.1
 // @description  Fix => aller sur le site https://nocturnex.alwaysdata.net/mosajax/  => et "Fix Upload Mosaïc".
 // @author       Atlantis
 // @icon         https://image.jeuxvideo.com/smileys_img/26.gif
@@ -217,39 +217,42 @@
                     method: 'POST',
                     url: 'https://www.noelshack.com/webservice/envoi.json',
                     data: formData,
-                    onload: function (res) {
-                        try {
-                            const data = JSON.parse(res.responseText);
-                            if (res.status === 200 && data?.url) {
-                                resolve(data.url);
-                            } else if (res.status !== 200 && attempt < maxRetries) {
-                                attempt++;
-                                setTimeout(tryUpload, delay);
-                            } else {
-                                console.warn(`❌ ${filename} → HTTP ${res.status}`);
-                                resolve(`[ECHEC]-${filename}`);
-                            }
-                        } catch (e) {
-                            if (attempt < maxRetries) {
-                                attempt++;
-                                setTimeout(tryUpload, delay);
-                            } else {
-                                console.warn(`❌ ${filename} → Erreur JSON`);
-                                resolve(`[ECHEC]-${filename}`);
-                            }
-                        }
-                    },
-                    onerror: () => {
-                        if (attempt < maxRetries) {
-                            attempt++;
-                            setTimeout(tryUpload, delay);
-                        } else {
-                            console.warn(`❌ ${filename} → Erreur réseau`);
-                            resolve(`[ECHEC]-${filename}`);
-                            output.textContent = `❌ ${filename} → Transfert impossible.`;
-                        }
-                    }
+                    onload: handleResponse,
+                    onerror: handleError
                 });
+            };
+
+            const handleResponse = function (res) {
+                try {
+                    const data = JSON.parse(res.responseText);
+                    if (res.status === 200 && data?.url) {
+                        resolve(data.url);
+                    } else if (res.status !== 200 && attempt < maxRetries) {
+                        attempt++;
+                        setTimeout(tryUpload, delay);
+                    } else {
+                        console.warn(`❌ ${filename} → HTTP ${res.status}`);
+                        resolve(`[ECHEC]-${filename}`);
+                    }
+                } catch (e) {
+                    if (attempt < maxRetries) {
+                        attempt++;
+                        setTimeout(tryUpload, delay);
+                    } else {
+                        console.warn(`❌ ${filename} → Erreur JSON`);
+                        resolve(`[ECHEC]-${filename}`);
+                    }
+                }
+            };
+            const handleError = () => {
+                if (attempt < maxRetries) {
+                    attempt++;
+                    setTimeout(tryUpload, delay);
+                } else {
+                    console.warn(`❌ ${filename} → Erreur réseau`);
+                    resolve(`[ECHEC]-${filename}`);
+                    output.textContent = `❌ ${filename} → Transfert impossible.`;
+                }
             };
             tryUpload();
         });
