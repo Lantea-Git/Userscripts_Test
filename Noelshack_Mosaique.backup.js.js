@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Noelshack_Mosaique
 // @namespace    Noelshack_Mosaique
-// @version      3.6
-// @description  Découpe une image et envoie chaque bloc sur Noelshack.
+// @version      4.9.5
+// @description  Fix => aller sur le site https://nocturnex.alwaysdata.net/mosajax/  => et "Fix Upload Mosaïc".
 // @author       Atlantis
 // @icon         https://image.jeuxvideo.com/smileys_img/26.gif
 // @license      CC0-1.0
@@ -22,29 +22,29 @@
 
     // UI flottante
     const ui = document.createElement('div');
-    Object.assign(ui.style, {
-        color: '#212121',
-        position: 'fixed',
-        bottom: '30px',
-        left: '30px',
-        width: '420px',
-        background: '#fff',
-        border: '1px solid #ccc',
-        borderRadius: '6px',
-        boxShadow: '0 4px 8px rgba(0,0,0,0.15)',
-        fontFamily: 'monospace',
-        fontSize: '13px',
-        padding: '10px',
-        zIndex: 10000,
-        whiteSpace: 'pre-wrap',
-        overflowY: 'auto',
-        maxHeight: '50vh',
-        display: 'none'
-    });
+    ui.style.cssText = `
+        color: #212121;
+        position: fixed;
+        top: 100px;
+        right: 30px;
+        width: 420px;
+        background: #fff;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        font-family: monospace;
+        font-size: 13px;
+        padding: 10px;
+        z-index: 10000;
+        white-space: pre-wrap;
+        overflow-y: auto;
+        max-height: 50vh;
+        display: none;
+    `;
 
 
     const title = document.createElement('div');
-    title.textContent = '📤 Envoi en cours...';
+    title.textContent = '⏫ Envoi en cours...';
     title.style.fontWeight = 'bold';
     title.style.marginBottom = '6px';
 
@@ -54,27 +54,27 @@
 
     const copyBtn = document.createElement('button');
     copyBtn.textContent = '📋 Copier';
-    Object.assign(copyBtn.style, {
-        padding: '6px 10px',
-        border: 'none',
-        background: '#4caf50',
-        color: 'white',
-        borderRadius: '4px',
-        cursor: 'pointer'
-    });
+    copyBtn.style.cssText = `
+        padding: 6px 10px;
+        border: none;
+        background: #4caf50;
+        color: white;
+        border-radius: 4px;
+        cursor: pointer;
+    `;
 
     const closeBtn = document.createElement('button');
     closeBtn.textContent = '❌ Fermer';
-    Object.assign(closeBtn.style, {
-        padding: '6px 10px',
-        border: 'none',
-        background: '#f44336',
-        color: 'white',
-        borderRadius: '4px',
-        cursor: 'pointer',
-        marginLeft: '8px'
-    });
-    
+    closeBtn.style.cssText = `
+        padding: 6px 10px;
+        border: none;
+        background: #f44336;
+        color: white;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-left: 8px;
+    `;
+
     closeBtn.onclick = () => {
         ui.style.display = 'none';
     };
@@ -95,20 +95,20 @@
 
     // Bouton principal
     const btn = document.createElement('button');
-    btn.textContent = '📤 Fix Upload Mosaïc';
+    btn.textContent = '⏫ Fix Upload Mosaïc';
     btn.classList.add('btn', 'btn-primary');
-    Object.assign(btn.style, {
-        color: 'white',
-        position: 'fixed',
-        bottom: '30px',
-        right: '30px',
-        zIndex: 9999,
-    });
+    btn.style.cssText = `
+        color: white;
+        position: fixed;
+        top: 100px;
+        left: 30px;
+        z-index: 9999;
+    `;
     document.body.appendChild(btn);
 
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = 'image/*';
+
     input.style.display = 'none';
     document.body.appendChild(input);
 
@@ -149,7 +149,7 @@
                 const allUrls = [];
 
                 ui.style.display = 'block';
-                title.textContent = '📤 Envoi en cours...';
+                title.textContent = '⏫ Envoi en cours...';
                 output.textContent = '';
                 copyBtn.style.display = 'none';
 
@@ -170,11 +170,15 @@
                         );
 
                         // Injection de bruit minimal (éviter images trop uniformes ou transparentes)
-                        const imgData = bctx.getImageData(1, 1, 1, 1); // pixel en (1,1)
+                        const randX = Math.floor(Math.random() * BLOCK_WIDTH);
+                        const randY = Math.floor(Math.random() * BLOCK_HEIGHT);
+                        const imgData = bctx.getImageData(randX, randY, 1, 1);
                         const d = imgData.data;
-                        d[0] += (d[0] <= 253) ? 2 : -2; // Rouge : +/-2 selon la valeur actuelle
-                        d[3] += (d[3] <= 253) ? 2 : -2; // Alpha : +/-2 selon la valeur actuelle
-                        bctx.putImageData(imgData, 1, 1);
+                        d[0] += (d[0] <= 253) ? 2 : -2; // Rouge
+                        d[3] += (d[3] <= 253) ? 2 : -2; // Alpha
+                        bctx.putImageData(imgData, randX, randY);
+                        console.log(`Pixel bruité : x : ${randX}, y : ${randY}\nExemple Coin haut gauche = 0 / 0`);
+
 
                         const blob = await new Promise(res => blockCanvas.toBlob(res, 'image/png'));
                         const index = y * cols + x + 1;
@@ -184,7 +188,7 @@
                         rowUrls.push(url);
 
                         const total = cols * rows; // total images
-                        title.textContent = `⟳ Envoi bloc vers NoelShach : [Ligne : ${y + 1}, Colone : ${x + 1}] \n Traitées : [${index}/${total}] (Certains seuils sont long)`;
+                        title.textContent = `⟳ Envoi bloc vers Noelshack : [Ligne : ${y + 1}, Colone : ${x + 1}] \n Traitées : [${index}/${total}] (Seuils de 4 sont LONG)`;
                     }
 
                     allUrls.push(rowUrls.join(' '));
@@ -204,56 +208,51 @@
             let attempt = 1;
 
             const tryUpload = () => {
-                console.log(`📡Tentative #${attempt} pour "${filename}"`);
-                const boundary = '----WebKitFormBoundary' + Math.random().toString(16).slice(2);
-                const part1 = `--${boundary}\r\nContent-Disposition: form-data; name="domain"\r\n\r\nhttps://www.jeuxvideo.com\r\n`;
-                const part2 = `--${boundary}\r\nContent-Disposition: form-data; name="fichier[]"; filename="${filename}"\r\nContent-Type: ${blob.type}\r\n\r\n`;
-                const tail = `\r\n--${boundary}--\r\n`;
-                const body = new Blob([part1, part2, blob, tail]);
+                console.log(`⏫ Tentative #${attempt} pour "${filename}"`);
+                const formData = new FormData();
+                formData.append('domain', 'https://www.jeuxvideo.com');
+                formData.append('fichier[]', blob, filename);
 
                 GM_xmlhttpRequest({
                     method: 'POST',
-                    url: `https://www.noelshack.com/webservice/envoi.json`,
-                    data: body,
-                    headers: {
-                        'Content-Type': `multipart/form-data; boundary=${boundary}`
-                    },
-                    //binary: true, //pas compatible avec violentmonkey
-                    overrideMimeType: 'application/octet-stream',
-                    responseType: 'text',
-                    onload: function (res) {
-                        try {
-                            const data = JSON.parse(res.responseText);
-                            if (res.status === 200 && data?.url) {
-                                resolve(data.url);
-                            } else if (res.status !== 200 && attempt < maxRetries) {
-                                attempt++;
-                                setTimeout(tryUpload, delay);
-                            } else {
-                                console.warn(`❌ ${filename} → HTTP ${res.status}`);
-                                resolve(`[ECHEC]-${filename}`);
-                            }
-                        } catch (e) {
-                            if (attempt < maxRetries) {
-                                attempt++;
-                                setTimeout(tryUpload, delay);
-                            } else {
-                                console.warn(`❌ ${filename} → Erreur JSON`);
-                                resolve(`[ECHEC]-${filename}`);
-                            }
-                        }
-                    },
-                    onerror: () => {
-                        if (attempt < maxRetries) {
-                            attempt++;
-                            setTimeout(tryUpload, delay);
-                        } else {
-                            console.warn(`❌ ${filename} → Erreur réseau`);
-                            resolve(`[ECHEC]-${filename}`);
-                            output.textContent = `❌ ${filename} → Transfert impossible.`;
-                        }
-                    }
+                    url: 'https://www.noelshack.com/webservice/envoi.json',
+                    data: formData,
+                    onload: handleResponse,
+                    onerror: handleError
                 });
+            };
+
+            const handleResponse = function (res) {
+                try {
+                    const data = JSON.parse(res.responseText);
+                    if (res.status === 200 && data?.url) {
+                        resolve(data.url);
+                    } else if (res.status !== 200 && attempt < maxRetries) {
+                        attempt++;
+                        setTimeout(tryUpload, delay);
+                    } else {
+                        console.warn(`❌ ${filename} → HTTP ${res.status}`);
+                        resolve(`[ECHEC]-${filename}`);
+                    }
+                } catch (e) {
+                    if (attempt < maxRetries) {
+                        attempt++;
+                        setTimeout(tryUpload, delay);
+                    } else {
+                        console.warn(`❌ ${filename} → Erreur JSON`);
+                        resolve(`[ECHEC]-${filename}`);
+                    }
+                }
+            };
+            const handleError = () => {
+                if (attempt < maxRetries) {
+                    attempt++;
+                    setTimeout(tryUpload, delay);
+                } else {
+                    console.warn(`❌ ${filename} → Erreur réseau`);
+                    resolve(`[ECHEC]-${filename}`);
+                    output.textContent = `❌ ${filename} → Transfert impossible.`;
+                }
             };
             tryUpload();
         });
