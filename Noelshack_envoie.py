@@ -10,7 +10,7 @@ import time
 
 #[1] SYSTÈME D'UPLOAD AVEC GESTION DES ERREURS 429 => 10 TENTATIVES
 #[1] On évite IMPÉRATIVEMENT LES REQUÊTES PARALLÈLES risque de blocage + Ralentissement important au final .
-def upload_image(filepath, max_retries=10, retry_delay=3):
+def upload_image(filepath, max_retries=10, retry_delay=3, success_pause=1.5):
     filename = os.path.basename(filepath)
     mime = 'image/png' if filename.lower().endswith('.png') else 'image/jpeg'
 
@@ -32,6 +32,7 @@ def upload_image(filepath, max_retries=10, retry_delay=3):
                     # [3] ON RECUPERE SEULEMENT URL (image direct) DE LA REPONSE
                     url = data["url"]
                     print(f"✅ {filename} envoyé")
+                    time.sleep(success_pause)
                     return url
                 except Exception:
                     print(f"⚠️ {filename} → réponse non JSON ou vide")
