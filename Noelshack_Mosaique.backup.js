@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Noelshack_Mosaique
 // @namespace    Noelshack_Mosaique
-// @version      5.7
+// @version      5.8
 // @description  Fix => aller sur le site https://nocturnex.alwaysdata.net/mosajax/  => et "Fix Upload Mosaïc".
 // @author       Atlantis
 // @icon         https://image.jeuxvideo.com/smileys_img/26.gif
@@ -203,7 +203,7 @@
         reader.readAsDataURL(file);
     };
 
-    function retryUpload(blob, filename, maxRetries = 10, delay = 3000) {
+    function retryUpload(blob, filename, maxRetries = 10, delay = 3000, successPause = 1500) {
         return new Promise((resolve) => {
             let attempt = 1;
 
@@ -235,10 +235,11 @@
                 }
             };
 
-            const handleResponse = function (res) {
+            const handleResponse = async function (res) {
                 try {
                     const data = JSON.parse(res.responseText);
                     if (res.status === 200 && data?.url) {
+                        await new Promise(r => setTimeout(r, successPause));
                         resolve(data.url);
                     } else if (res.status !== 200 && attempt < maxRetries) {
                         attempt++;
