@@ -1,16 +1,16 @@
 // ==UserScript==
 // @name         Noelshack_Mosaique
 // @namespace    Noelshack_Mosaique
-// @version      5.8
+// @version      5.9
 // @description  Fix => aller sur le site https://nocturnex.alwaysdata.net/mosajax/  => et "Fix Upload Mosaïc".
 // @author       Atlantis
 // @icon         https://image.jeuxvideo.com/smileys_img/26.gif
 // @license      CC0-1.0
 // match        *://www.jeuxvideo.com/forums/*
-// @match        *://nocturnex.alwaysdata.net/mosajax/
+// @match        https://nocturnex.alwaysdata.net/mosajax/
 // @downloadURL  https://github.com/Lantea-Git/Userscripts_Test/raw/main/Noelshack_Mosaique.user.js
 // @updateURL    https://github.com/Lantea-Git/Userscripts_Test/raw/main/Noelshack_Mosaique.user.js
-// @grant        GM_xmlhttpRequest
+// @grant        GM.xmlHttpRequest
 // @connect      www.noelshack.com
 // ==/UserScript==
 
@@ -113,7 +113,7 @@
     document.body.appendChild(input);
 
     btn.onclick = () => input.click();
-    const sessionId = Math.random().toString(36).slice(2, 10);
+
     input.onchange = () => {
         const file = input.files[0];
         if (!file) return;
@@ -139,12 +139,12 @@
 
                 const totalW = BLOCK_WIDTH * cols;
                 const totalH = BLOCK_HEIGHT * rows;
-
-                const resizedCanvas = document.createElement('canvas');
-                resizedCanvas.width = totalW;
-                resizedCanvas.height = totalH;
-                const ctx = resizedCanvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, totalW, totalH);
+                
+                // On crée un ImageBitmap redimensionné (objet image, pas un canvas → pas de taint cascade sur Firefox)
+                const resizedBitmap = await createImageBitmap(img, {
+                    resizeWidth: totalW,
+                    resizeHeight: totalH
+                });
 
                 const allUrls = [];
 
@@ -163,7 +163,7 @@
                         const bctx = blockCanvas.getContext('2d');
 
                         bctx.drawImage(
-                            resizedCanvas,
+                            resizedBitmap,
                             x * BLOCK_WIDTH, y * BLOCK_HEIGHT,
                             BLOCK_WIDTH, BLOCK_HEIGHT,
                             0, 0, BLOCK_WIDTH, BLOCK_HEIGHT
@@ -225,7 +225,7 @@
                     }).catch(() => handleError());
                 } else {
                     // ====== MODE GM ======
-                    GM_xmlhttpRequest({
+                    GM.xmlHttpRequest({
                         method: 'POST',
                         url: 'https://www.noelshack.com/webservice/envoi.json',
                         data: formData,
